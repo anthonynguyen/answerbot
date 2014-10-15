@@ -1,8 +1,10 @@
 import re
 import string
 
-def remove_punc(s):
-    return re.sub("[\.\?\!]", "", s)
+from fuzzywuzzy import fuzz
+
+def clean_str(s):
+    return re.sub("[\.\?\!\"']", "", s).lower()
 
 class AnswerPlugin:
     def __init__(self, bot):
@@ -12,7 +14,6 @@ class AnswerPlugin:
         self.bot.registerEvent("public_message", self.on_chatmsg)
 
         answers = open(self.bot.basepath + "/trivia.db").readlines()
-        answers = map(lambda s: remove_punc(s), answers)
         self.answers = {}
         for a in answers:
             p = a.split("*")
@@ -24,9 +25,18 @@ class AnswerPlugin:
         pass
 
     def get_answer(self, q):
-        strippedQ = remove_punc(q)
-        if strippedQ in self.answers:
-            return self.answers[strippedQ][0]
+        candidates = []
+        for pair in self.answers:
+            score = fuzz.ratio(clean_str(pair), clean_str(q))
+            if score == 100:
+                return self.answers[pair][0]
+            elif score >= 80: 
+                candidates.append([score, self.answers[pair][0]])
+
+        if candidates:
+            candidates.sort(key = lambda x: x[0], reverse = True)
+            print(candidates)
+            return candidates[0][1]
 
         return None
 
@@ -45,7 +55,7 @@ class AnswerPlugin:
         m = self._ANSWERRE.findall(message)
         if m and self.question is not None:
             self.bot.say("Learned: {}".format(m[0].strip()))
-            self.answers[remove_punc(self.question)] = m[:]
+            self.answers[self.question] = m[:]
             self.question = None
             return
 
