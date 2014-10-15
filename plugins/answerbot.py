@@ -3,8 +3,10 @@ import string
 
 from fuzzywuzzy import fuzz
 
+
 def clean_str(s):
     return re.sub("[\.\?\!\"']", "", s).lower()
+
 
 class AnswerPlugin:
     def __init__(self, bot):
@@ -48,11 +50,11 @@ class AnswerPlugin:
             score = fuzz.ratio(clean_str(pair), clean_str(q))
             if score == 100:
                 return self.answers[pair][0]
-            elif score >= 80: 
+            elif score >= 80:
                 candidates.append([score, self.answers[pair][0]])
 
         if candidates:
-            candidates.sort(key = lambda x: x[0], reverse = True)
+            candidates.sort(key=lambda x: x[0], reverse=True)
             print(candidates)
             return candidates[0][1]
 
@@ -60,6 +62,7 @@ class AnswerPlugin:
 
     _QUESTIONRE = re.compile("Question \d+( \(.+?\))?: ")
     _ANSWERRE = re.compile("Time's up! The answer was: (.+)")
+
     def on_chatmsg(self, ev):
         if ev.source.nick != "triviabot":
             return
@@ -86,4 +89,3 @@ class AnswerPlugin:
         if answer is not None:
             self.question = None
             self.bot.say(answer.strip())
-        
