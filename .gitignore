@@ -12,3 +12,4 @@ dist/
 
 config.json
 *.sqlite
+trivia.db
