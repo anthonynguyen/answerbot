@@ -11,6 +11,7 @@ class AnswerPlugin:
         self.bot = bot
 
     def startup(self, config):
+        self.bot.registerCommand("answers", self.cmd_answers)
         self.bot.registerCommand("dump", self.cmd_dump)
         self.bot.registerEvent("public_message", self.on_chatmsg)
 
@@ -32,7 +33,13 @@ class AnswerPlugin:
         database.close()
         self.bot.say("Answers dumped.")
 
+    def cmd_answers(self, issuedBy, data):
+        """- says how many answers are known"""
+        self.bot.say("I know the answers to {} questions."
+                     .format(len(self.answers)))
+
     def cmd_dump(self, issuedBy, data):
+        """- dumps all known answers to the database file"""
         self.shutdown()
 
     def get_answer(self, q):
