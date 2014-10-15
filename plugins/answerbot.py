@@ -11,9 +11,11 @@ class AnswerPlugin:
         self.bot = bot
 
     def startup(self, config):
+        self.bot.registerCommand("dump", self.cmd_dump)
         self.bot.registerEvent("public_message", self.on_chatmsg)
 
         answers = open(self.bot.basepath + "/trivia.db").readlines()
+        answers = map(lambda a: a.strip(), answers)
         self.answers = {}
         for a in answers:
             p = a.split("*")
@@ -22,7 +24,16 @@ class AnswerPlugin:
         self.question = None
 
     def shutdown(self):
-        pass
+        database = open(self.bot.basepath + "/trivia.db", "w")
+
+        for a in self.answers:
+            database.write("{}*{}\n".format(a, "*".join(self.answers[a])))
+
+        database.close()
+        self.bot.say("Answers dumped.")
+
+    def cmd_dump(self, issuedBy, data):
+        self.shutdown()
 
     def get_answer(self, q):
         candidates = []
