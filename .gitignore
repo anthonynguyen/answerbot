@@ -1,0 +1,14 @@
+env
+venv
+
+*.swp
+
+__pycache__
+*.pyc
+
+*.egg-info
+build/
+dist/
+
+config.json
+*.sqlite
